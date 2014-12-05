@@ -1,0 +1,6 @@
+#!/bin/bash
+class_path=$1
+shift # Removes the first arg from $@
+args=$@
+
+python -c "import ${class_path}; ${class_path}.main();" "$@"
