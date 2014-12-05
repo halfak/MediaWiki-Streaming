@@ -1,9 +1,10 @@
 """
 Converts a sequence of MediaWiki Dump JSON'd revisions into diffs.  Assumes
 that input to <stdin> is partitioned by page (<page.id>) and sorted in the order the
-revisions were saved (<timestamp> ASC, <id> ASC).
+revisions were saved (ORDER BY <timestamp> ASC, <id> ASC).
 
-Produces identical JSON with a new 'diff' field to <stdout>.
+Produces identical JSON with an additional 'diff' field to <stdout>.  You can
+save space with `--drop-text`.
 
 Usage:
     ./json2diffs --config=<path> [--drop-text]
@@ -19,26 +20,9 @@ from deltas.tokenizers import Tokenizer
 import yamlconf
 
 
-def read_revisions(f):
+def read_json_docs(f):
     for line in f:
         yield json.loads(line.strip())
-
-
-def op2doc(operation, a, b):
-    
-    name, a1, a2, b1, b2 = operation
-    doc = {
-        'name': name,
-        'a1': a1,
-        'a2': a2,
-        'b1': b1,
-        'b2': b2
-    }
-    if name == "insert": doc['tokens'] = b[b1:b2]
-    elif name == "delete": doc['tokens'] = a[a1:a2]
-    else: pass
-    
-    return doc
 
 def main():
     args = docopt.docopt(__doc__)
@@ -49,7 +33,7 @@ def main():
     detector = Detector.from_config(config_doc, config_doc['detector'])
     tokenizer = Tokenizer.from_config(config_doc, config_doc['tokenizer'])
     
-    run(read_revisions(sys.stdin), detector, tokenizer, drop_text)
+    run(read_json_docs(sys.stdin), detector, tokenizer, drop_text)
 
 def run(revisions, detector, tokenizer, drop_text):
     
@@ -75,5 +59,21 @@ def run(revisions, detector, tokenizer, drop_text):
             print(json.dumps(revision))
             
             last_tokens = tokens
+
+def op2doc(operation, a, b):
+    
+    name, a1, a2, b1, b2 = operation
+    doc = {
+        'name': name,
+        'a1': a1,
+        'a2': a2,
+        'b1': b1,
+        'b2': b2
+    }
+    if name == "insert": doc['tokens'] = b[b1:b2]
+    elif name == "delete": doc['tokens'] = a[a1:a2]
+    else: pass
+    
+    return doc
 
 if __name__ == "__main__": main()
