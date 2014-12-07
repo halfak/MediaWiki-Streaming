@@ -23,7 +23,7 @@ setup(
     entry_points = {
         'console_scripts': [
             'dump2json=mwstreaming.dump2json:main',
-            'json2diff=mwstreaming.json2diff:main',
+            'json2diffs=mwstreaming.json2diffs:main',
             'json2tsv=mwstreaming.json2tsv:main'
         ],
     },

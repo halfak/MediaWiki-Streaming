@@ -3,11 +3,14 @@ Generates token persistence statistics by reading revision diffs and applying
 them to a token list.
 
 Expects to get revision diff JSON blobs via <stdin> that are partitioned by
-page_id and otherwise sorted chronologically.  Outputs token persistence JSON
-blobs.
+page_id and otherwise sorted chronologically.  Outputs token persistence
+statistics JSON blobs.
 
-Uses a 'window' to limit memory usage.  New revisions enter the beginning of the
-window and old revisions fall off the end.
+Uses a 'window' to limit memory usage.  New revisions enter the head of the
+window and old revisions fall off the tail.  Stats are generated at the tail of
+the window.
+
+
 
 ::
                            window
@@ -21,52 +24,94 @@ window and old revisions fall off the end.
 
 Usage:
     token_persistence [--window=<revs>] [--revert-radius=<revs>]
-                      [--sunset=<date>] [--verbose]
+                      [--sunset=<date>] [--keep-diff] [--verbose]
     
 Options:
     -h|--help                Prints this documentation
     --window=<revs>          The size of the window of revisions from which
                              persistence data will be generated.
+                             [default: 50]
     --revert-radius=<revs>   The number of revisions back that a revert can
-                             reference.
+                             reference. [default: 15]
     --sunset=<date>          The date of the database dump we are generating
                              from.  This is used to apply a 'time visible'
                              statistic.  Expects %Y-%m-%dT%H:%M:%SZ".
+                             [default: <now>]
+    --keep-diff              Do not drop 'diff' field data from the json blobs.
     --verbose                Print out progress information
 """
+import json
 import sys
+import time
 from collections import deque
+from itertools import groupby
 
 import docopt
+from mw import Timestamp
 from mw.lib import reverts
 
 
-def run(diff_docs, window_size, sunset, verbose):
+def read_diff_docs(f):
+    for line in f:
+        yield json.loads(line.strip())
+
+def main():
+    args = docopt.docopt(__doc__)
     
+    diff_docs = read_diff_docs(sys.stdin)
+    
+    window_size = int(args['--window'])
+    
+    revert_radius = int(args['--revert-radius'])
+    
+    if args['--sunset'] == "<now>":
+        sunset = Timestamp(time.time())
+    else:
+        sunset = Timestamp(args['--sunset'])
+    
+    keep_diff = bool(args['--keep-diff'])
+    verbose = bool(args['--verbose'])
+    
+    run(diff_docs, window_size, revert_radius, sunset, keep_diff, verbose)
+
+def run(diff_docs, window_size, revert_radius, sunset, keep_diff, verbose):
+    
+    for doc, token_stats in token_persistence(diff_docs, window_size,
+                                              revert_radius, sunset, verbose):
+        for ts in token_stats:
+            if not keep_diff: doc.pop("diff", None)
+            ts['revision'] = doc
+            json.dump(ts, sys.stdout)
+            sys.stdout.write("\n")
+    
+def token_persistence(diff_docs, window_size, revert_radius, sunset, verbose):
     page_diff_docs = groupby(diff_docs, key=lambda d: d['page']['title'])
     
     for page_title, diff_docs in page_diff_docs:
         
         if verbose: sys.stderr.write(page_title + ": ")
         
-        revert_detector = reverts.Detector()
+        revert_detector = reverts.Detector(revert_radius)
         last_tokens = Tokens()
-        window = deque(window_size)
+        window = deque(maxlen=window_size)
         
         for doc in diff_docs:
+            if verbose: sys.stderr.write(".")
             
             # Check for revert
             revert = revert_detector.process(doc['sha1'], doc)
-            if revert not None:
+            if revert is None:
                 tokens, tokens_added, tokens_removed = \
                         last_tokens.apply(doc['diff'])
                 
             else:
-                revert_to, _, _ = revert
+                _, _, revert_to = revert
+                #sys.stderr.write(str(revert_to) + "\n")
                 tokens = revert_to['tokens']
                 tokens_added = Tokens(set(tokens) - set(last_tokens))
                 tokens_removed = Tokens(set(last_tokens) - set(tokens))
                 
+            #sys.stderr.write(str(doc['id']) + "\n")
             # Makes this available when the revision is reverted back to.
             doc['tokens'] = tokens
             
@@ -78,18 +123,56 @@ def run(diff_docs, window_size, sunset, verbose):
             
             tokens.persist(doc['contributor'])
             
-            #TODO: Generate and print out token stats
+            if len(window) == window_size: # Time to start writing some stats
+                old_doc, old_added = window[0]
+                window.append((doc, tokens_added))
+                del old_doc['tokens']
+                yield old_doc, generate_stats(old_doc, old_added, window, sunset)
+            else:
+                window.append((doc, tokens_added))
+            
+        while len(window) > 0:
+            old_doc, old_added = window.popleft()
+            del old_doc['tokens']
+            yield old_doc, generate_stats(old_doc, old_added, window, sunset)
         
-        
-        
-        
-        
+        if verbose: sys.stderr.write("\n")
+    
+
+def generate_stats(doc, tokens_added, window, sunset):
+    
+    revisions_processed = len(window)
+    
+    if len(window) == 0:
+        last_timestamp = sunset
+    else:
+        last_timestamp = window[-1][0]['timestamp']
+    
+    seconds_possible = max(Timestamp(last_timestamp) -
+                           Timestamp(doc['timestamp']), 0)
+    
+    for token in tokens_added:
+        non_self_persisted = sum(doc['contributor'] != c
+                                 for c in token.revisions)
+        non_self_processed = sum(doc['contributor'] != d['contributor']
+                                 for d, ts in window)
+        yield {
+            "token": str(token), # token
+            "persisted": len(token.revisions[1:]),
+            "processed": revisions_processed,
+            "non_self_persisted": non_self_persisted,
+            "non_self_processed": non_self_processed,
+            "seconds_visible": token.seconds_visible(last_timestamp),
+            "seconds_possible": seconds_possible
+        }
+
+
 class Tokens(list):
 
     def persist(self, revision):
         for token in self:
             token.persist(revision)
-        
+    
     def visible_at(self, timestamp):
         for token in self:
             token.visible_at(timestamp)
@@ -100,20 +183,20 @@ class Tokens(list):
             token.invisible_at(timestamp)
         
     
-    def apply_delta(self, delta):
+    def apply(self, operations):
         tokens = Tokens()
         tokens_added = Tokens()
         tokens_removed = Tokens()
         
-        for op in delta['operations']:
+        for op in operations:
             
-            if op['op'] == "Insert":
+            if op['name'] == "insert":
                 
                 new_tokens = [Token(t) for t in op['tokens']]
                 tokens.extend(new_tokens)
                 tokens_added.extend(new_tokens)
             
-            elif op['op'] == "Replace":
+            elif op['name'] == "replace":
                 
                 new_tokens = [Token(t) for t in op['tokens']]
                 tokens.extend(new_tokens)
@@ -121,11 +204,11 @@ class Tokens(list):
                 
                 tokens_removed.extend(self[op['a1']:op['a2']])
             
-            elif op['op'] == "Delete":
+            elif op['name'] == "delete":
                 
                 tokens_removed.extend(self[op['a1']:op['a2']])
                 
-            elif op['op'] == "Equal":
+            elif op['name'] == "equal":
                 
                 tokens.extend(self[op['a1']:op['a2']])
                 
@@ -139,9 +222,9 @@ class Tokens(list):
 
 class Token(str):
     
-    def __new__(cls, string, meta=None):
+    def __new__(cls, string, revisions=None):
         inst = super().__new__(cls, string)
-        inst.initialize(string, meta=meta or {})
+        inst.initialize(string, revisions or [])
         return inst
     
     def __init__(self, *args, **kawrgs): pass

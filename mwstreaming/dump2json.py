@@ -42,7 +42,7 @@ def main():
     args = docopt.docopt(__doc__)
     
     if len(args['<dump_file>']) == 0:
-        dump_files = sys.stdin
+        dump_files = []
     else:
         dump_files = args['<dump_file>']
     
@@ -67,8 +67,18 @@ def run(dump_files, threads, schema, verbose):
         for revision_doc in dump2json(dump, verbose=verbose):
             if schema is not None: validate(revision_doc, schema)
             yield revision_doc
+    
+    if len(dump_files) == 0:
         
-    for revision_doc in xml_dump.map(dump_files, process_dump, threads=threads):
+        revision_docs = process_dump(xml_dump.Iterator.from_file(sys.stdin),
+                                     "<stdin>")
+        
+    else:
+        
+        revision_docs = xml_dump.map(dump_files, process_dump, threads=threads)
+    
+        
+    for revision_doc in revision_docs:
         json.dump(revision_doc, sys.stdout)
         sys.stdout.write("\n")
 
