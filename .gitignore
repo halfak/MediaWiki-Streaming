@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# Datasets
+*.json
+*.bz2
+*.xml
+
 # Distribution / packaging
 .Python
 env/

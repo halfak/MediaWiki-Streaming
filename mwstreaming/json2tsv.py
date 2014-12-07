@@ -20,7 +20,7 @@ import docopt
 def read_json_docs(f):
     for line in f:
         yield json.loads(line.strip())
-    
+
 def main():
     args = docopt.docopt(__doc__)
     

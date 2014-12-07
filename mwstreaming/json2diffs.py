@@ -7,7 +7,7 @@ Produces identical JSON with an additional 'diff' field to <stdout>.  You can
 save space with `--drop-text`.
 
 Usage:
-    ./json2diffs --config=<path> [--drop-text]
+    ./json2diffs --config=<path> [--drop-text] [--verbose]
 """
 import json
 import sys
@@ -28,37 +28,49 @@ def main():
     args = docopt.docopt(__doc__)
     
     config_doc = yamlconf.load(open(args['--config']))
-    drop_text = bool(args['--drop-text'])
-    
     detector = Detector.from_config(config_doc, config_doc['detector'])
     tokenizer = Tokenizer.from_config(config_doc, config_doc['tokenizer'])
     
-    run(read_json_docs(sys.stdin), detector, tokenizer, drop_text)
+    drop_text = bool(args['--drop-text'])
+    verbose = bool(args['--verbose'])
+    
+    run(read_json_docs(sys.stdin), detector, tokenizer, drop_text, verbose)
 
-def run(revisions, detector, tokenizer, drop_text):
+def run(revision_docs, detector, tokenizer, drop_text, verbose):
     
-    page_revisions = groupby(revisions, key=lambda r:r['page']['id'])
+    for revision_doc in json2diffs(revision_docs, detector, tokenizer, verbose):
+        if drop_text:
+            del revision_doc['text']
+        
+        json.dump(revision_doc, sys.stdout)
+        sys.stdout.write("\n")
+
+def json2diffs(revision_docs, detector, tokenizer, verbose):
     
-    for page_id, revisions in page_revisions:
+    page_revision_docs = groupby(revision_docs, key=lambda r:r['page']['title'])
+    
+    for page_title, revision_docs in page_revision_docs:
+        
+        if verbose: sys.stderr.write(page_title + ": ")
         
         last_tokens = []
-        for revision in revisions:
+        for revision_doc in revision_docs:
+            if verbose: sys.stderr.write("."); sys.stderr.flush()
             
             # Diff detection uses a lot of CPU.  This will be the hottest part
             # of the code.
-            print(revision)
-            tokens = tokenizer.tokenize(revision['text'] or "")
+            tokens = tokenizer.tokenize(revision_doc['text'] or "")
             operations = detector.diff(last_tokens, tokens)
             
-            # Drop the text field
-            if drop_text: del revision['text']
+            revision_doc['diff'] = [op2doc(op, last_tokens, tokens)
+                                    for op in operations]
             
-            revision['diff'] = [op2doc(op, last_tokens, tokens)
-                                for op in operations]
-            
-            print(json.dumps(revision))
+            yield revision_doc
             
             last_tokens = tokens
+        
+        
+        if verbose: sys.stderr.write("\n")
 
 def op2doc(operation, a, b):
     

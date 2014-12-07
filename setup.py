@@ -22,13 +22,13 @@ setup(
     packages=find_packages(),
     entry_points = {
         'console_scripts': [
-            'dump2json=dump2json:main',
-            'json2diff=json2diff:main',
-            'json2tsv=json2tsv:main'
+            'dump2json=mwstreaming.dump2json:main',
+            'json2diff=mwstreaming.json2diff:main',
+            'json2tsv=mwstreaming.json2tsv:main'
         ],
     },
     long_description = read('README.rst'),
-    install_requires = ['docopt', 'deltas'],
+    install_requires = ['docopt', 'deltas', 'yamlconf'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Development Status :: 3 - Alpha",
