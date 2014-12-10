@@ -40,7 +40,7 @@ def main():
     drop_text = bool(args['--drop-text'])
     verbose = bool(args['--verbose'])
     
-    print(args['--field'])
+    #print(args['--field'])
     field = int(args['--field'])
     
     run(read_json_docs(sys.stdin, field), detector, tokenizer, drop_text, verbose)
