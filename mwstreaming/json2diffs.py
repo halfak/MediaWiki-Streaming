@@ -11,7 +11,7 @@ Usage:
 
 Options:
     --config=<path>    The path to difference detection configuration
-    -f, --field=<num>  The field of a TSV to process [default: 0]
+    -f, --field=<num>  The field of a TSV to process [default: 1]
     --drop-text        Drops the 'text' field from the JSON blob
     --verbose          Print out progress information
 """
@@ -28,7 +28,7 @@ import yamlconf
 
 def read_json_docs(f, field):
     for line in f:
-        yield json.loads(line.strip().split("\t")[field])
+        yield json.loads(line.strip().split("\t")[field-1])
 
 def main():
     args = docopt.docopt(__doc__)
