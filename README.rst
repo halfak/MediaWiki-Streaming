@@ -5,6 +5,8 @@ A collection of scripts and utilities to support the stream-processing of
 MediaWiki data.
 
 * dump2json -- Converts an XML dump to a stream of revision JSON blobs
+* wikihadoop2json -- Converts a Wikihadoop-processed stream of XML pages to JSON
+                     blobs
 * json2tsv -- Converts a stream of JSON blobs to tab-separated values
 * json2diffs -- Computes and adds a "diff" field to a stream of revision JSON
                 blobs

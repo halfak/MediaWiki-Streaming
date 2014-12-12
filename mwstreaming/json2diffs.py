@@ -25,10 +25,8 @@ from deltas.tokenizers import Tokenizer
 
 import yamlconf
 
+from .util import read_docs
 
-def read_json_docs(f, field):
-    for line in f:
-        yield json.loads(line.strip().split("\t")[field-1])
 
 def main():
     args = docopt.docopt(__doc__)
@@ -43,7 +41,7 @@ def main():
     #print(args['--field'])
     field = int(args['--field'])
     
-    run(read_json_docs(sys.stdin, field), detector, tokenizer, drop_text, verbose)
+    run(read_docs(sys.stdin, field), detector, tokenizer, drop_text, verbose)
 
 def run(revision_docs, detector, tokenizer, drop_text, verbose):
     

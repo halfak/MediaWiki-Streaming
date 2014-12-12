@@ -16,18 +16,15 @@ import sys
 
 import docopt
 
+from .util import read_docs
 
-def read_json_docs(f):
-    for line in f:
-        yield json.loads(line.strip())
 
 def main():
     args = docopt.docopt(__doc__)
     
-    json_docs = read_json_docs(sys.stdin)
     header = bool(args['--header'])
     
-    run(json_docs, args['<fieldname>'], header)
+    run(read_docs(sys.stdin), args['<fieldname>'], header)
 
 def run(json_docs, fieldnames, header):
     

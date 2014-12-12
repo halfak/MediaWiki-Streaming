@@ -1,4 +1,4 @@
-"""
+r"""
 Generates token persistence statistics by reading revision diffs and applying
 them to a token list.
 
@@ -9,8 +9,6 @@ statistics JSON blobs.
 Uses a 'window' to limit memory usage.  New revisions enter the head of the
 window and old revisions fall off the tail.  Stats are generated at the tail of
 the window.
-
-
 
 ::
                            window
@@ -23,11 +21,13 @@ the window.
 
 
 Usage:
-    token_persistence [--window=<revs>] [--revert-radius=<revs>]
+    token_persistence [-f=<num>]
+                      [--window=<revs>] [--revert-radius=<revs>]
                       [--sunset=<date>] [--keep-diff] [--verbose]
     
 Options:
     -h|--help                Prints this documentation
+    -f, --field=<num>        The field of a TSV to process [default: 1]
     --window=<revs>          The size of the window of revisions from which
                              persistence data will be generated.
                              [default: 50]
@@ -50,15 +50,11 @@ import docopt
 from mw import Timestamp
 from mw.lib import reverts
 
+from .util import read_docs
 
-def read_diff_docs(f):
-    for line in f:
-        yield json.loads(line.strip())
 
 def main():
     args = docopt.docopt(__doc__)
-    
-    diff_docs = read_diff_docs(sys.stdin)
     
     window_size = int(args['--window'])
     
@@ -72,7 +68,7 @@ def main():
     keep_diff = bool(args['--keep-diff'])
     verbose = bool(args['--verbose'])
     
-    run(diff_docs, window_size, revert_radius, sunset, keep_diff, verbose)
+    run(read_docs(sys.stdin), window_size, revert_radius, sunset, keep_diff, verbose)
 
 def run(diff_docs, window_size, revert_radius, sunset, keep_diff, verbose):
     
@@ -264,3 +260,6 @@ class Token(str):
         return "{0}({1}, {2})".format(self.__class__.__name__,
                                       repr(str(self)),
                                       self.revisions)
+
+
+if __name__ == "__main__": main()

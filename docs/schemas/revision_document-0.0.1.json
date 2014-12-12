@@ -1,7 +1,8 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "Revision Document",
+    "title": "RevisionDocument (v0.0.1)",
     "type": "object",
+    "required": ["id", "timestamp", "page", "contributor", "minor", "comment", "bytes", "sha1", "parent_id", "model", "format"],
     "properties": {
         "id": {
             "description": "The revision identifier",
@@ -14,6 +15,7 @@
         "page": {
             "description": "Metadata about the page the revision was saved to",
             "type": "object",
+            "required": ["id", "namespace", "title", "redirect", "restrictions"],
             "properties": {
                 "id": {
                     "description": "The page's identifier",
@@ -69,6 +71,36 @@
         "text": {
             "description": "The content of the revision.  Might be null if the revision content was deleted.",
             "type": ["string", "null"]
+        },
+        "diff": {
+            "description": "A collection of operations that represent the changes made in this revision.",
+            "type": "array",
+            "items": {
+                "description": "Operation",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "The name of the operation",
+                        "enum": ["insert", "delete", "replace", "equals"]
+                    },
+                    "a1": {
+                        "description": "A reference to a starting token index from the last revision",
+                        "type": "number"
+                    },
+                    "a2": {
+                        "description": "A reference to a ending token index from the last revision",
+                        "type": "number"
+                    },
+                    "b1": {
+                        "description": "A reference to a starting token index from the current revision",
+                        "type": "number"
+                    },
+                    "b2": {
+                        "description": "A reference to a ending token index from the current revision",
+                        "type": "number"
+                    }
+                }
+            }
         },
         "bytes": {
             "description": "The size of revision content in bytes",
