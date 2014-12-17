@@ -3,11 +3,12 @@ Validates a stream of JSON documents against a JSON schema and writes them to
 stdout if they validate -- otherwise, complains noisily.
 
 Usage:
-    jsonvalidate <schema>
+    validate (-h|--help)
+    validate <schema>
 
 Options:
     -h|--help      Print this documentation
-    <schema>       The paths of a JSON schema to use for validation
+    <schema>       The path of a JSON schema to use for validation
 """
 import json
 import sys
@@ -19,8 +20,8 @@ from jsonschema import validate
 from .util import read_docs
 
 
-def main():
-    args = docopt.docopt(__doc__)
+def main(argv=None):
+    args = docopt.docopt(__doc__, argv=argv)
     
     schema = json.load(open(args['<schema>']))
     

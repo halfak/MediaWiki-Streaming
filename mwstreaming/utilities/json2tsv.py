@@ -3,8 +3,8 @@ Extracts fields from a JSON blob and places them in-front of the blob in a
 TSV.
 
 Usage:
-    extract_fields (-h|--help)
-    extract_fields [--header] <fieldname>...
+    json2tsv (-h|--help)
+    json2tsv [--header] <fieldname>...
 
 Options:
     -h|--help       Print this documentation
@@ -19,8 +19,8 @@ import docopt
 from .util import read_docs
 
 
-def main():
-    args = docopt.docopt(__doc__)
+def main(argv=None):
+    args = docopt.docopt(__doc__, argv or sys.argv[1:])
     
     header = bool(args['--header'])
     

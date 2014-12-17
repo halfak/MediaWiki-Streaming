@@ -22,13 +22,7 @@ setup(
     packages=find_packages(),
     entry_points = {
         'console_scripts': [
-            'diffs2persistence=mwstreaming.diffs2persistence:main',
-            'dump2json=mwstreaming.dump2json:main',
-            'json2diffs=mwstreaming.json2diffs:main',
-            'json2tsv=mwstreaming.json2tsv:main',
-            'normalize=mwstreaming.normalize:main',
-            'persistence2revstats=mwstreaming.persistence2revstats:main',
-            'wikihadoop2json=mwstreaming.wikihadoop2json:main'
+            'mwstream=mwstreaming.mwstream:main'
         ],
     },
     long_description = read('README.rst'),
@@ -39,7 +33,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Intended Audience :: Science/Research",
         "Intended Audience :: System Administrators",
-        "Intended Audience :: Developers"
+        "Intended Audience :: Developers",
         "Operating System :: OS Independent",
         "Topic :: Utilities",
         "Topic :: Scientific/Engineering"

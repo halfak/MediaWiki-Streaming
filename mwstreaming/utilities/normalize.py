@@ -3,6 +3,7 @@ Converts a stream of RevisionDocument JSON blobs to JSON blobs that will
 validate against the latest schema (v0.0.2).
 
 Usage:
+    normalize (-h | --help)
     normalize
 
 Options:
@@ -16,8 +17,8 @@ import docopt
 from .util import read_docs
 
 
-def main():
-    args = docopt.docopt(__doc__)
+def main(argv=None):
+    args = docopt.docopt(__doc__, argv or sys.argv[1:])
     
     run(read_docs(sys.stdin), schema)
     

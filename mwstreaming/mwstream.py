@@ -1,0 +1,60 @@
+"""
+Provides access to a set of utilities for stream-processing MediaWiki data.
+
+Data processing utilities:
+
+* diffs2persistence     Generates token persistence statistics using revision
+                        JSON blobs with diff information.
+
+* dump2json             Converts an XML dump to a stream of revision JSON blobs
+
+* json2diffs            Computes and adds a "diff" field to a stream of revision
+                        JSON blobs
+
+* persistence2revstats  Aggregates a token persistence statistics to revision
+                        statistics
+
+* wikihadoop2json       Converts a Wikihadoop-processed stream of XML pages to
+                        JSON blobs
+
+General utilities:
+
+* json2tsv              Converts a stream of JSON blobs to tab-separated values
+                        based a set of /fieldnames/.
+
+* normalize             Normalizes old versions of RevisionDocument json schemas
+                        to correspond to the most recent schema version.
+
+* validate              Validates JSON against a provided schema.
+
+Usage:
+    mwstream (-h | --help)
+    mwstream <utility> [-h|--help]
+"""
+import sys
+from importlib import import_module
+
+import docopt
+
+
+def main():
+    
+    if len(sys.argv) < 2 or "-" in sys.argv[1]:
+        sys.stderr.write("Usage:\n" +
+                         "   mwstream (-h | --help)\n" +
+                         "   mwstream <utility> [-h|--help]\n")
+        sys.exit(1)
+    if sys.argv[1] in ("-h", "--help"):
+        sys.stderr.write(__doc__ + "\n")
+        sys.exit(1)
+    else:
+        module_name = sys.argv[1]
+        try:
+            module = import_module("mwstreaming.utilities." + module_name)
+        except ImportError:
+            sys.stderr.write("Could not find utility {0}.\n".format(module_name))
+            sys.exit(1)
+        
+        module.main(sys.argv[2:])
+
+if __name__ == "__main__": main()

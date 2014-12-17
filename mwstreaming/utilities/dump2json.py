@@ -14,6 +14,7 @@ multi-threaded.  You can customize the number of parallel `--threads`.
 $ dump2json pages-meta-history*.xml.bz2 | bzip2 -c > revisions.json.bz2
 
 Usage:
+    dump2json (-h|--help)
     dump2json [--threads=<num>] [--verbose] [<dump_file>...]
 
 Options:
@@ -33,8 +34,8 @@ from mw import xml_dump
 from .util import revision2doc
 
 
-def main():
-    args = docopt.docopt(__doc__)
+def main(argv=None):
+    args = docopt.docopt(__doc__, argv or sys.argv[1:])
     
     if len(args['<dump_file>']) == 0:
         dump_files = []

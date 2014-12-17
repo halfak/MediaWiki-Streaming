@@ -21,7 +21,8 @@ the window.
 
 
 Usage:
-    token_persistence [-f=<num>]
+    diffs2persistence (-h|--help)
+    diffs2persistence [-f=<num>]
                       [--window=<revs>] [--revert-radius=<revs>]
                       [--sunset=<date>] [--keep-diff] [--verbose]
     
@@ -53,8 +54,8 @@ from mw.lib import reverts
 from .util import read_docs
 
 
-def main():
-    args = docopt.docopt(__doc__)
+def main(argv=None):
+    args = docopt.docopt(__doc__, argv or sys.argv[1:])
     
     window_size = int(args['--window'])
     

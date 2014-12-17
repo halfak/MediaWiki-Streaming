@@ -7,6 +7,7 @@ Produces identical JSON with an additional 'diff' field to <stdout>.  You can
 save space with `--drop-text`.
 
 Usage:
+    json2diffs (-h|--help)
     json2diffs --config=<path> [-f=<num>] [--drop-text] [--verbose]
 
 Options:
@@ -28,8 +29,8 @@ import yamlconf
 from .util import read_docs
 
 
-def main():
-    args = docopt.docopt(__doc__)
+def main(argv=None):
+    args = docopt.docopt(__doc__, argv or sys.argv[1:])
     
     config_doc = yamlconf.load(open(args['--config']))
     detector = Detector.from_config(config_doc, config_doc['detector'])

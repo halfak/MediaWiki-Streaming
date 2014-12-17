@@ -2,12 +2,11 @@
 Converts Wikihadoop XML page pairs to JSON revision documents.
 
 Usage:
+    wikihadoop2json (-h | --help)
     wikihadoop2json [--validate=<path>] [--verbose]
 
 Options:
     -h|--help          Print this documentation
-    --validate=<path>  Validate json output against a schema.  Skip validation
-                       if not set.
     --verbose          Print progress information to stderr.  Kind of a mess
                        when running multi-threaded.
 """
@@ -20,13 +19,8 @@ from mw import xml_dump
 from .util import revision2doc
 
 
-def main():
-    args = docopt.docopt(__doc__)
-    
-    if args['--validate'] is not None:
-        schema = json.load(open(args['--validate']))
-    else:
-        schema = None
+def main(argv=None):
+    args = docopt.docopt(__doc__, argv or sys.argv[1:])
     
     verbose = bool(args['--verbose'])
     
