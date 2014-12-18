@@ -20,7 +20,7 @@ from .util import read_docs
 
 
 def main(argv=None):
-    args = docopt.docopt(__doc__, argv or sys.argv[1:])
+    args = docopt.docopt(__doc__, argv=argv)
     
     header = bool(args['--header'])
     

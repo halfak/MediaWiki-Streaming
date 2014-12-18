@@ -30,7 +30,7 @@ from .util import read_docs
 
 
 def main(argv=None):
-    args = docopt.docopt(__doc__, argv or sys.argv[1:])
+    args = docopt.docopt(__doc__, argv=argv)
     
     config_doc = yamlconf.load(open(args['--config']))
     detector = Detector.from_config(config_doc, config_doc['detector'])

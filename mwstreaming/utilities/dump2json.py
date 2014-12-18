@@ -35,7 +35,7 @@ from .util import revision2doc
 
 
 def main(argv=None):
-    args = docopt.docopt(__doc__, argv or sys.argv[1:])
+    args = docopt.docopt(__doc__, argv=argv)
     
     if len(args['<dump_file>']) == 0:
         dump_files = []

@@ -20,7 +20,7 @@ from .util import revision2doc
 
 
 def main(argv=None):
-    args = docopt.docopt(__doc__, argv or sys.argv[1:])
+    args = docopt.docopt(__doc__, argv=argv)
     
     verbose = bool(args['--verbose'])
     
