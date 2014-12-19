@@ -22,21 +22,20 @@ the window.
 
 Usage:
     diffs2persistence (-h|--help)
-    diffs2persistence [-f=<num>]
+    diffs2persistence --sunset=<date>
                       [--window=<revs>] [--revert-radius=<revs>]
-                      [--sunset=<date>] [--keep-diff] [--verbose]
+                      [--keep-diff] [--verbose]
     
 Options:
     -h|--help                Prints this documentation
-    -f, --field=<num>        The field of a TSV to process [default: 1]
+    --sunset=<date>          The date of the database dump we are generating
+                             from.  This is used to apply a 'time visible'
+                             statistic.  Expects %Y-%m-%dT%H:%M:%SZ".
     --window=<revs>          The size of the window of revisions from which
                              persistence data will be generated.
                              [default: 50]
     --revert-radius=<revs>   The number of revisions back that a revert can
                              reference. [default: 15]
-    --sunset=<date>          The date of the database dump we are generating
-                             from.  This is used to apply a 'time visible'
-                             statistic.  Expects %Y-%m-%dT%H:%M:%SZ".
                              [default: <now>]
     --keep-diff              Do not drop 'diff' field data from the json blobs.
     --verbose                Print out progress information
@@ -108,7 +107,7 @@ def token_persistence(diff_docs, window_size, revert_radius, sunset, verbose):
                 tokens_added = Tokens(set(tokens) - set(last_tokens))
                 tokens_removed = Tokens(set(last_tokens) - set(tokens))
                 
-            #sys.stderr.write(str(doc['id']) + "\n")
+            
             # Makes this available when the revision is reverted back to.
             doc['tokens'] = tokens
             
@@ -127,6 +126,9 @@ def token_persistence(diff_docs, window_size, revert_radius, sunset, verbose):
                 yield old_doc, generate_stats(old_doc, old_added, window, sunset)
             else:
                 window.append((doc, tokens_added))
+            
+            last_tokens = tokens # THIS LINE IS SUPER IMPORTANT.  NOTICE ME!
+                
             
         while len(window) > 0:
             old_doc, old_added = window.popleft()
@@ -154,7 +156,7 @@ def generate_stats(doc, tokens_added, window, sunset):
         non_self_processed = sum(doc['contributor'] != d['contributor']
                                  for d, ts in window)
         yield {
-            "token": str(token), # token
+            "token": str(token),
             "persisted": len(token.revisions[1:]),
             "processed": revisions_processed,
             "non_self_persisted": non_self_persisted,
@@ -169,6 +171,7 @@ class Tokens(list):
     def persist(self, revision):
         for token in self:
             token.persist(revision)
+            
     
     def visible_at(self, timestamp):
         for token in self:
@@ -202,11 +205,9 @@ class Tokens(list):
                 tokens_removed.extend(self[op['a1']:op['a2']])
             
             elif op['name'] == "delete":
-                
                 tokens_removed.extend(self[op['a1']:op['a2']])
                 
             elif op['name'] == "equal":
-                
                 tokens.extend(self[op['a1']:op['a2']])
                 
             else:
@@ -214,22 +215,23 @@ class Tokens(list):
                        "encounted an unrecognized operation code: " + \
                        repr(op['op'])
             
+        
         return (tokens, tokens_added, tokens_removed)
     
 
 class Token(str):
     
-    def __new__(cls, string, revisions=None):
+    def __new__(cls, string, revisions=None, visible=0, visible_since=None):
         inst = super().__new__(cls, string)
-        inst.initialize(string, revisions or [])
+        inst.initialize(string, revisions or [], visible, visible_since)
         return inst
     
     def __init__(self, *args, **kawrgs): pass
     
-    def initialize(self, string, revisions):
+    def initialize(self, string, revisions, visible, visible_since):
         self.revisions = revisions if revisions is not None else []
-        self.visible = 0
-        self.visible_since = None
+        self.visible = visible
+        self.visible_since = visible_since
         
     def visible_at(self, timestamp):
         if self.visible_since is None:
@@ -243,7 +245,9 @@ class Token(str):
         if self.visible_since is not None:
             self.visible += max(timestamp - self.visible_since, 0)
         else:
-            sys.stderr.write(".")#assert False, repr(self)
+            # This happens with diff algorithms that will detect content
+            # duplication
+            pass
         
         self.visible_since = None
     
@@ -260,7 +264,9 @@ class Token(str):
     def __repr__(self):
         return "{0}({1}, {2})".format(self.__class__.__name__,
                                       repr(str(self)),
-                                      self.revisions)
+                                      self.revisions,
+                                      self.visible,
+                                      self.visible_since)
 
 
 if __name__ == "__main__": main()

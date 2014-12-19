@@ -31,30 +31,39 @@ Usage:
     mwstream (-h | --help)
     mwstream <utility> [-h|--help]
 """
+
 import sys
 from importlib import import_module
 
 import docopt
 
 
+USAGE = """Usage:
+    mwstream (-h | --help)
+    mwstream <utility> [-h|--help]\n"""
+
+
 def main():
     
-    if len(sys.argv) < 2 or "-" in sys.argv[1]:
-        sys.stderr.write("Usage:\n" +
-                         "   mwstream (-h | --help)\n" +
-                         "   mwstream <utility> [-h|--help]\n")
+    
+    
+    if len(sys.argv) < 2:
+        sys.stderr.write(USAGE)
         sys.exit(1)
-    if sys.argv[1] in ("-h", "--help"):
+    elif sys.argv[1] in ("-h", "--help"):
         sys.stderr.write(__doc__ + "\n")
         sys.exit(1)
-    else:
-        module_name = sys.argv[1]
-        try:
-            module = import_module("mwstreaming.utilities." + module_name)
-        except ImportError:
-            sys.stderr.write("Could not find utility {0}.\n".format(module_name))
-            sys.exit(1)
-        
-        module.main(sys.argv[2:])
+    elif sys.argv[1][:1] == "-":
+        sys.stderr.write(USAGE)
+        sys.exit(1)
+    
+    module_name = sys.argv[1]
+    try:
+        module = import_module("mwstreaming.utilities." + module_name)
+    except ImportError:
+        sys.stderr.write("Could not find utility {0}.\n".format(module_name))
+        sys.exit(1)
+    
+    module.main(sys.argv[2:])
 
 if __name__ == "__main__": main()

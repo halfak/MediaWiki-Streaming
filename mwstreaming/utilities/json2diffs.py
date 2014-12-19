@@ -8,11 +8,10 @@ save space with `--drop-text`.
 
 Usage:
     json2diffs (-h|--help)
-    json2diffs --config=<path> [-f=<num>] [--drop-text] [--verbose]
+    json2diffs --config=<path> [--drop-text] [--verbose]
 
 Options:
     --config=<path>    The path to difference detection configuration
-    -f, --field=<num>  The field of a TSV to process [default: 1]
     --drop-text        Drops the 'text' field from the JSON blob
     --verbose          Print out progress information
 """
@@ -39,10 +38,7 @@ def main(argv=None):
     drop_text = bool(args['--drop-text'])
     verbose = bool(args['--verbose'])
     
-    #print(args['--field'])
-    field = int(args['--field'])
-    
-    run(read_docs(sys.stdin, field), detector, tokenizer, drop_text, verbose)
+    run(read_docs(sys.stdin), detector, tokenizer, drop_text, verbose)
 
 def run(revision_docs, detector, tokenizer, drop_text, verbose):
     
