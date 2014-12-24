@@ -45,8 +45,6 @@ USAGE = """Usage:
 
 def main():
     
-    
-    
     if len(sys.argv) < 2:
         sys.stderr.write(USAGE)
         sys.exit(1)

@@ -1,6 +1,7 @@
 """
-Extracts fields from a JSON blob and places them in-front of the blob in a
-TSV.
+Extracts fields from a JSON blob.  Fieldnames can reference nested blobs with a
+".".  For example, {"foo": {"bar": 5}} can be references with "foo.bar".  Use
+a "-" to print out the JSON blob itself as a column.
 
 Usage:
     json2tsv (-h|--help)
@@ -9,7 +10,7 @@ Usage:
 Options:
     -h|--help       Print this documentation
     --header        Print out a header row
-    <fieldname>...  Fields from the JSON blob to extract as escaped strings
+    <fieldname>...  Fields from the JSON blob to extract
 """
 import json
 import sys
