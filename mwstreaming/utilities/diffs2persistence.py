@@ -123,7 +123,7 @@ def token_persistence(diff_docs, window_size, revert_radius, sunset, verbose):
                 old_doc, old_added = window[0]
                 window.append((doc, tokens_added))
                 del old_doc['tokens']
-                yield old_doc, generate_stats(old_doc, old_added, window, sunset)
+                yield old_doc, generate_stats(old_doc, old_added, window, None)
             else:
                 window.append((doc, tokens_added))
             
@@ -139,15 +139,12 @@ def token_persistence(diff_docs, window_size, revert_radius, sunset, verbose):
     
 
 def generate_stats(doc, tokens_added, window, sunset):
-    
     revisions_processed = len(window)
     
-    if len(window) == 0:
-        last_timestamp = sunset
-    else:
-        last_timestamp = window[-1][0]['timestamp']
+    if sunset is None:
+        sunset = window[-1][0]['timestamp'] # Use the last revision in the window
     
-    seconds_possible = max(Timestamp(last_timestamp) -
+    seconds_possible = max(Timestamp(sunset) -
                            Timestamp(doc['timestamp']), 0)
     
     for token in tokens_added:
@@ -161,7 +158,7 @@ def generate_stats(doc, tokens_added, window, sunset):
             "processed": revisions_processed,
             "non_self_persisted": non_self_persisted,
             "non_self_processed": non_self_processed,
-            "seconds_visible": token.seconds_visible(last_timestamp),
+            "seconds_visible": token.seconds_visible(sunset),
             "seconds_possible": seconds_possible
         }
 

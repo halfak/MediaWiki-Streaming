@@ -11,7 +11,7 @@ Data processing utilities:
 * json2diffs            Computes and adds a "diff" field to a stream of revision
                         JSON blobs
 
-* persistence2revstats  Aggregates a token persistence statistics to revision
+* persistence2stats     Aggregates a token persistence statistics to revision
                         statistics
 
 * wikihadoop2json       Converts a Wikihadoop-processed stream of XML pages to
