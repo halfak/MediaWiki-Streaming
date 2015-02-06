@@ -26,7 +26,7 @@ setup(
         ],
     },
     long_description = read('README.rst'),
-    install_requires = ['docopt', 'deltas', 'yamlconf'],
+    install_requires = ['docopt', 'deltas', 'yamlconf', 'mediawiki-utilities'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Development Status :: 3 - Alpha",
