@@ -27,6 +27,10 @@ General utilities:
 
 * validate              Validates JSON against a provided schema.
 
+* truncate_text         Truncates the 'text' field of JSON blobs to a limited
+                        length in unicode characters.  (addresses content dump
+                        vandalism issues) and adds a boolean 'truncated' field.
+
 Usage:
     mwstream (-h | --help)
     mwstream <utility> [-h|--help]
