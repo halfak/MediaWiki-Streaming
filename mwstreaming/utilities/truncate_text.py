@@ -19,8 +19,6 @@ import sys
 
 import docopt
 
-from jsonschema import validate
-
 from .util import read_docs
 
 
