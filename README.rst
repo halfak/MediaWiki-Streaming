@@ -34,6 +34,10 @@ General utilities
         to the most recent schema version.
     ``validate``
         Validates JSON against a provided schema.
+    ``truncate_text``
+        Truncates the 'text' field of JSON blobs to a limited length in 
+        unicode characters.  (addresses content dump vandalism issues) and 
+        adds a boolean 'truncated' field.
 
 
 Installation
