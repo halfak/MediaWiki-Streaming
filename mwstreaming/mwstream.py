@@ -8,6 +8,8 @@ Data processing utilities:
 
 * dump2json             Converts an XML dump to a stream of revision JSON blobs
 
+* dump2diffs            Computes diffs directly from an XML database dump.
+
 * json2diffs            Computes and adds a "diff" field to a stream of revision
                         JSON blobs
 

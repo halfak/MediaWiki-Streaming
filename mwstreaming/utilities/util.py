@@ -49,3 +49,19 @@ def revision2doc(revision, page):
     }
     
     return revision_doc
+
+def op2doc(operation, a, b):
+    
+    name, a1, a2, b1, b2 = operation
+    doc = {
+        'name': name,
+        'a1': a1,
+        'a2': a2,
+        'b1': b1,
+        'b2': b2
+    }
+    if name == "insert": doc['tokens'] = b[b1:b2]
+    elif name == "delete": doc['tokens'] = a[a1:a2]
+    else: pass
+    
+    return doc

@@ -1,11 +1,6 @@
 
-tokenizer: wikitext_split
+tokenizer: deltas.tokenizers.wikitext_split
 detector: segment_matcher
-
-
-tokenizers:
-  wikitext_split:
-    class: deltas.tokenizers.WikitextSplit
 
 detectors:
   segment_matcher:
@@ -15,7 +10,3 @@ detectors:
 segmenters:
   western_psw:
     class: deltas.segmenters.ParagraphsSentencesAndWhitespace
-    whitespace: "[\\r\\n\\t\\ ]+"
-    paragraph_split: "[\\t\\ \\r]*[\n][\\t\\ \\r]*[\n][\\t\\ \\r]*"
-    sentence_end: "[.?!]+"
-    min_sentence: 5

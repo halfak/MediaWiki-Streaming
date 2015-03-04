@@ -25,7 +25,7 @@ from deltas.tokenizers import Tokenizer
 
 import yamlconf
 
-from .util import read_docs
+from .util import op2doc, read_docs
 
 
 def main(argv=None):
@@ -75,21 +75,5 @@ def json2diffs(revision_docs, detector, tokenizer, verbose):
         
         
         if verbose: sys.stderr.write("\n")
-
-def op2doc(operation, a, b):
-    
-    name, a1, a2, b1, b2 = operation
-    doc = {
-        'name': name,
-        'a1': a1,
-        'a2': a2,
-        'b1': b1,
-        'b2': b2
-    }
-    if name == "insert": doc['tokens'] = b[b1:b2]
-    elif name == "delete": doc['tokens'] = a[a1:a2]
-    else: pass
-    
-    return doc
 
 if __name__ == "__main__": main()
