@@ -17,6 +17,8 @@ Data processing utilities
         diff information.
     ``dump2json``
         Converts an XML dump to a stream of revision JSON blobs
+    ``dump2json``
+        Computes diffs directly from an XML dump
     ``json2diffs``
         Computes and adds a "diff" field to a stream of revision JSON blobs
     ``persistence2stats``
@@ -35,8 +37,8 @@ General utilities
     ``validate``
         Validates JSON against a provided schema.
     ``truncate_text``
-        Truncates the 'text' field of JSON blobs to a limited length in 
-        unicode characters.  (addresses content dump vandalism issues) and 
+        Truncates the 'text' field of JSON blobs to a limited length in
+        unicode characters.  (addresses content dump vandalism issues) and
         adds a boolean 'truncated' field.
 
 
