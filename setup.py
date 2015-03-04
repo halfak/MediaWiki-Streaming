@@ -2,6 +2,8 @@ import os
 
 from setuptools import find_packages, setup
 
+import mwstreaming
+
 
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
@@ -12,7 +14,7 @@ def requirements(fname):
 
 setup(
     name = "mwstreaming",
-    version = read('VERSION').strip(),
+    version = mwstreaming.__version__,
     author = "Aaron Halfaker",
     author_email = "ahalfaker@wikimedia.org",
     description = "A collection of scripts and utilities to support the " +
