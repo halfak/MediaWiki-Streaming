@@ -1,11 +1,15 @@
 
-tokenizer: deltas.tokenizers.wikitext_split
-detector: segment_matcher
+diff_engine: segment_matcher
 
-detectors:
+tokenizers:
+  wikitext_split:
+    module: deltas.tokenizers.wikitext_split
+
+diff_engines:
   segment_matcher:
-    class: deltas.detectors.SegmentMatcher
+    class: deltas.algorithms.SegmentMatcher
     segmenter: western_psw
+    tokenizer: wikitext_split
 
 segmenters:
   western_psw:
