@@ -7,7 +7,7 @@ A set of utilities for stream-processing MediaWiki data.
 Usage
 -----
     ``mwstream (-h | --help)``
-    
+
     ``mwstream <utility> [-h|--help]``
 
 Data processing utilities
