@@ -21,6 +21,8 @@ Data processing utilities
         Computes diffs directly from an XML dump
     ``json2diffs``
         Computes and adds a "diff" field to a stream of revision JSON blobs
+    ``mend_diffs``
+        Mends diffs that were computed in chunks and out of order.
     ``persistence2stats``
         Aggregates a token persistence statistics to revision statistics
     ``wikihadoop2json``

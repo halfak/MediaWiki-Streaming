@@ -13,6 +13,9 @@ Data processing utilities:
 * json2diffs            Computes and adds a "diff" field to a stream of revision
                         JSON blobs
 
+* mend_diffs            Mends diffs that were computed in chunks and out of
+                        order
+
 * persistence2stats     Aggregates a token persistence statistics to revision
                         statistics
 
@@ -51,7 +54,7 @@ USAGE = """Usage:
 
 
 def main():
-    
+
     if len(sys.argv) < 2:
         sys.stderr.write(USAGE)
         sys.exit(1)
@@ -61,7 +64,7 @@ def main():
     elif sys.argv[1][:1] == "-":
         sys.stderr.write(USAGE)
         sys.exit(1)
-    
+
     module_name = sys.argv[1]
     try:
         module = import_module("mwstreaming.utilities." + module_name)
@@ -69,7 +72,7 @@ def main():
         sys.stderr.write(traceback.format_exc())
         sys.stderr.write("Could not load utility {0}.\n".format(module_name))
         sys.exit(1)
-    
+
     module.main(sys.argv[2:])
 
 if __name__ == "__main__": main()

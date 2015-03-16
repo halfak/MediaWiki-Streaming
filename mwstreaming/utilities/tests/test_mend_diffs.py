@@ -52,7 +52,9 @@ def test_mend_diffs():
         {'id': 4, 'text': "Apples are a red fruit", 'page': {'title': "Foo"},
          'diff': {'last_id': 3, 'ops': []}},
         {'id': 5, 'text': "Apples are a lame fruit", 'page': {'title': "Foo"},
-         'diff': {'last_id': 4, 'ops': []}}
+         'diff': {'last_id': 4, 'ops': []}},
+        {'id': 10, 'text': "Bar text", 'page': {'title': "Bar"},
+         'diff': {'last_id': None, 'ops': []}}
     ]
     diff_engine = FakeDiffEngine()
     new_docs = [r for r in mend_diffs(revision_docs, diff_engine)]
@@ -75,3 +77,6 @@ def test_mend_diffs():
 
     eq_(new_docs[4]['diff']['ops'], [])
     eq_(new_docs[4]['diff']['last_id'], 4)
+
+    eq_(new_docs[5]['diff']['ops'], [])
+    eq_(new_docs[5]['diff']['last_id'], None)

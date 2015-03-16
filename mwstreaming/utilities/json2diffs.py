@@ -136,6 +136,7 @@ def diff_revisions(revision_docs, processor, last_id=None, timeout=None):
 
         revision_doc['diff'] = diff
         yield revision_doc
+        last_id = revision_doc['id']
 
 
 class Timer:

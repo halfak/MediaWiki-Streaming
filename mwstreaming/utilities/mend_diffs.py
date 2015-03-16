@@ -19,13 +19,18 @@ Options:
                            processed [default: <all>]
     --verbose              Print out progress information
 """
+import json
 import sys
 from itertools import groupby
 
 import docopt
+from deltas import DiffEngine
 from more_itertools import peekable
 
+import yamlconf
+
 from .json2diffs import diff_revisions
+from .util import read_docs
 
 
 def main(argv=None):
@@ -47,59 +52,65 @@ def main(argv=None):
 
 def run(diff_docs, diff_engine, timeout, drop_text, verbose):
 
-    for mended_doc in mend_diffs(diff_docs):
+    for mended_doc in mend_diffs(diff_docs, diff_engine, timeout, verbose):
         if drop_text:
             del mended_doc['text']
 
-        json.dump(diff_doc, sys.stdout)
+        json.dump(mended_doc, sys.stdout)
         sys.stdout.write("\n")
 
-def mend_diffs(revision_docs, diff_engine, timeout=None, drop_text=False,
-               verbose=False):
+def mend_diffs(diff_docs, diff_engine, timeout=None, verbose=False):
 
-    page_revision_docs = groupby(revision_docs,
-                                 key=lambda r:r['page']['title'])
+    page_diff_docs = groupby(diff_docs, key=lambda r:r['page']['title'])
 
-    for page_title, revision_docs in page_revision_docs:
+    for page_title, page_docs in page_diff_docs:
+        if verbose: sys.stderr.write(page_title + ": ")
 
-        revision_docs = peekable(revision_docs)
+        page_docs = peekable(page_docs)
 
-        while revision_docs.peek(None) is not None:
+        while page_docs.peek(None) is not None:
 
-            revision_doc = next(revision_docs)
+            diff_doc = next(page_docs)
 
-            if 'text' not in revision_doc:
+            if 'text' not in diff_doc:
                 raise RuntimeError("Revision documents must contain a 'text' " +
                                    "field for mending.")
-            elif 'diff' not in revision_doc:
+            elif 'diff' not in diff_doc:
                 raise RuntimeError("Revision documents must contain a 'diff' " +
                                    "field for mending.")
 
-            yield revision_doc
+            yield diff_doc
+            if verbose: sys.stderr.write(".");sys.stderr.flush()
 
-            # Check if we're going to need to mend
-            if revision_docs.peek()['diff']['last_id'] != revision_doc['id']:
-                processor = diff_engine.processor(last_text=revision_doc['text'])
-
-                broken_docs = read_broken_docs(revision_docs)
+            # Check if we're going to need to mend the next revision
+            if page_docs.peek(None) and \
+               page_docs.peek()['diff']['last_id'] != diff_doc['id']:
+                processor = diff_engine.processor(last_text=diff_doc['text'])
+                broken_docs = read_broken_docs(page_docs)
                 mended_docs = diff_revisions(broken_docs, processor,
-                                             last_id=revision_doc['id'],
+                                             last_id=diff_doc['id'],
                                              timeout=timeout)
 
                 for mended_doc in mended_docs:
                     yield mended_doc
+                    if verbose: sys.stderr.write("M");sys.stderr.flush()
 
 
-def read_broken_docs(revision_docs):
+        if verbose: sys.stderr.write("\n")
+
+    if verbose: sys.stderr.write("\n")
+
+
+def read_broken_docs(page_docs):
     """
     Reads broken diff docs.  This method assumes that the first doc was already
     determined to be broken.
     """
-    revision_doc = next(revision_docs)
-    yield revision_doc
+    page_doc = next(page_docs)
+    yield page_doc
 
-    while revision_docs.peek(None) is not None and \
-          revision_docs.peek()['diff']['last_id'] != revision_doc['id']:
+    while page_docs.peek(None) is not None and \
+          page_docs.peek()['diff']['last_id'] != page_doc['id']:
 
-          revision_doc = next(revision_docs)
-          yield revision_doc
+          page_doc = next(page_docs)
+          yield page_doc
