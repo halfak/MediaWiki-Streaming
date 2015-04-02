@@ -79,13 +79,14 @@ def mend_diffs(diff_docs, diff_engine, timeout=None, verbose=False):
                 raise RuntimeError("Revision documents must contain a 'diff' " +
                                    "field for mending.")
 
+            last_text = diff_doc['text']
             yield diff_doc
             if verbose: sys.stderr.write(".");sys.stderr.flush()
 
             # Check if we're going to need to mend the next revision
-            if page_docs.peek(None) and \
+            if page_docs.peek(None) is not None and \
                page_docs.peek()['diff']['last_id'] != diff_doc['id']:
-                processor = diff_engine.processor(last_text=diff_doc['text'])
+                processor = diff_engine.processor(last_text=last_text)
                 broken_docs = read_broken_docs(page_docs)
                 mended_docs = diff_revisions(broken_docs, processor,
                                              last_id=diff_doc['id'],
