@@ -14,7 +14,7 @@ def requirements(fname):
 
 setup(
     name = "mwstreaming",
-    version = "0.5.3",
+    version = "0.5.4",
     author = "Aaron Halfaker",
     author_email = "ahalfaker@wikimedia.org",
     description = "A collection of scripts and utilities to support the " +
