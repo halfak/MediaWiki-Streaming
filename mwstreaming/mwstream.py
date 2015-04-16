@@ -10,6 +10,9 @@ Data processing utilities:
 
 * dump2diffs            Computes diffs directly from an XML database dump.
 
+* fetch_missing_diffs   Scans diff documents looking for missing diffs and
+                        fills them in.
+
 * json2diffs            Computes and adds a "diff" field to a stream of revision
                         JSON blobs
 
