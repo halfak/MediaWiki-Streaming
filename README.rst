@@ -1,5 +1,5 @@
 MediaWiki Streaming
-===================
+====================
 
 A set of utilities for stream-processing MediaWiki data.
 
