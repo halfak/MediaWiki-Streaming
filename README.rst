@@ -19,8 +19,12 @@ Data processing utilities
         Converts an XML dump to a stream of revision JSON blobs
     ``dump2diffs``
         Computes diffs directly from an XML dump
+    ``fetch_missing_diffs``
+        Scans diff documents looking for missing diffs and fills them in.
     ``json2diffs``
         Computes and adds a "diff" field to a stream of revision JSON blobs
+    ``mend_diffs``
+        Mends diffs that were computed in chunks and out of order.
     ``persistence2stats``
         Aggregates a token persistence statistics to revision statistics
     ``wikihadoop2json``
