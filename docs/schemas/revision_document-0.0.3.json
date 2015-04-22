@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema#",
-    "title": "RevisionDocument (v0.0.2)",
+    "title": "RevisionDocument (v0.0.3)",
     "type": "object",
     "required": ["id", "timestamp", "page", "contributor", "minor", "comment", "bytes", "sha1", "parent_id", "model", "format"],
     "properties": {
