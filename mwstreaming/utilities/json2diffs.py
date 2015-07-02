@@ -123,12 +123,27 @@ def diff_revisions(revision_docs, processor, last_id=None, timeout=None):
                     # We didn't timeout.  cool.
                     diff['ops'] = [op2doc(op, a, b) for op in operations]
                 else:
-                    # We timed out.  That means we don't have operations to
-                    # record
-                    diff['ops'] = None
+                    # We timed out.  Record a giant delete and insert
+                    diff['ops'] = [
+                        {
+                            'name': "delete",
+                            'a1': 0,
+                            'a2': len(a),
+                            'b1': 0,
+                            'b2': 0,
+                            'tokens': a
+                        },
+                        {
+                            'name': "insert",
+                            'a1': 0,
+                            'a2': 0,
+                            'b1': 0,
+                            'b2': len(b),
+                            'tokens': b
+                        }
+                    ]
 
-                    # We also need to make sure that the processor state is
-                    # right
+                    # Make sure that the processor state is right
                     processor.update(last_text=(revision_doc['text'] or ""))
 
         # All done.  Record how much time it all took
