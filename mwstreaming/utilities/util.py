@@ -1,8 +1,10 @@
+import io
 import json
 
 
 def read_docs(f, field=1):
-    for line in f:
+    input_stream = io.TextIOWrapper(f.buffer, encoding='utf-8')
+    for line in input_stream:
         yield json.loads(line.strip().split("\t")[field-1])
 
 def revision2doc(revision, page):
